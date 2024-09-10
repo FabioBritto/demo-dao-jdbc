@@ -3,6 +3,8 @@ package application;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import model.dao.DaoFactory;
+import model.dao.SellerDao;
 import model.entities.Department;
 import model.entities.Seller;
 
@@ -20,6 +22,13 @@ public class Program {
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
+		
+		/*
+		 * Desta forma, o meu programa não conhece a implementação. Conhece somente a interface.
+		 * É uma forma de fazer injeção de dependências
+		 */
+		SellerDao sellerDao = DaoFactory.createSellerDao();
+		System.out.println(sellerDao);
 
 	}
 
