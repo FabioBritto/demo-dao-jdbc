@@ -83,7 +83,6 @@ public class SellerDaoJDBC implements SellerDao {
 	public List<Seller> findByDepartment(Department department){
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		//Aqui eu não preciso criar um objeto Connection, porque o nosso DAO, terá uma DEPENDÊNCIA COM A CONEXÃO
 		try {
 			st = conn.prepareStatement(
 					"SELECT seller.*,department.Name as DepName " +
@@ -93,21 +92,6 @@ public class SellerDaoJDBC implements SellerDao {
 					"ORDER BY Name");
 			st.setInt(1, department.getId());
 			rs = st.executeQuery();
-			/*
-			 * Aqui, diferente do método findById, eu estou buscando pelo ID do Department, ou seja,
-			 * eu posso ter mais 0ZERO ou mais resultados. Por isso, eu troco o IF por um WHILE, pra
-			 * garantir que acharei todos os correspondentes
-			 */
-			
-			
-			/*
-			 * Para eu garantir que não estarei instanciando novos departamentes, eu faço o seguinte:
-			 * 1 - Eu preciso criar um MAP pra garantir que haja apenas um correspondente entre o ID e
-			 * a instância do Department em si.
-			 * 2 - Eu declaro uma variável do tipo Department que recebe o retorno do método get() buscando
-			 * o ID resultante do ResultSet naquela linha
-			 * 3 - Caso o valor de dep seja null, ele adiciona esse dep ao map, para que não haja mais correspondências
-			 */
 			
 			List<Seller> sellerList = new ArrayList<>();
 			Map<Integer,Department> map = new HashMap<>();
@@ -134,7 +118,37 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		return null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement(
+					"SELECT seller.*,department.Name as DepName " +
+					"FROM seller INNER JOIN department " +
+					"ON seller.DepartmentId = department.Id " +
+					"ORDER by Name");
+			
+			rs = st.executeQuery();
+			List<Seller> sellerList = new ArrayList<>();
+			Map<Integer,Department> map = new HashMap<>();
+			
+			while(rs.next()) {
+				
+				Department dep = map.get(rs.getInt("DepartmentId"));
+				if(dep == null) {
+					 dep = instantiateDepartment(rs);
+					 map.put(rs.getInt("DepartmentId"), dep);
+				}
+				sellerList.add(instantiateSeller(rs, dep));
+			}
+			return sellerList;
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeRestultSet(rs);
+		}
 	}
 	
 	/*

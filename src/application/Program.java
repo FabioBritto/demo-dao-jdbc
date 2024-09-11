@@ -30,6 +30,11 @@ public class Program {
 		for(Seller s : list) {
 			System.out.println(s);
 		}
+		
+		List<Seller> allSellers = sellerDao.findAll();
+		for(Seller s : allSellers) {
+			System.out.println(s);
+		}
 	}
 
 }
