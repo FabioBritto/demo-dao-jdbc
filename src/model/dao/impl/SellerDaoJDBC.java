@@ -1,9 +1,12 @@
 package model.dao.impl;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +30,49 @@ public class SellerDaoJDBC implements SellerDao {
 	
 	@Override
 	public void insert(Seller obj) {
-		
-		
+		PreparedStatement st = null;
+		try {
+			st = conn.prepareStatement(
+					"INSERT INTO seller " +
+					"(Name, Email, BirthDate, BaseSalary, DepartmentId) " +
+					"VALUES " +
+					"(?,?,?,?,?)",
+					//Aqui eu estou retornando o meu ID do novo Seller
+					Statement.RETURN_GENERATED_KEYS);
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			
+			//Faço isso pra descobrir se alguma linha no banco foi de fato alterada
+			int rowsAffected = st.executeUpdate();
+			
+			if(rowsAffected > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				if(rs.next()) {
+					//Aqui eu já estou na primeira linha com dados. O 1UM passado como parâmetro
+					//serve para que eu acesse o primeiro dado, que é justamente o ID
+					int id = rs.getInt(1);
+					/*
+					 * Aqui eu seto o valor de ID que é gerado AUTOMATICAMENTE no banco de dados,
+					 * e seto como o id do objeto Seller que estou trabalhando no momento.
+					 * Como o dado de ID não é gerado por mim e sim pelo banco, preciso fazer isso pra setar
+					 */
+					obj.setId(id);
+				}
+				DB.closeRestultSet(rs);
+			}
+			else {
+				throw new DbException("Erro Inesperado. Nenhuma linha do banco foi afetada!");
+			}
+		}
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
