@@ -61,19 +61,8 @@ public class SellerDaoJDBC implements SellerDao {
 			 * Portanto, preciso testar se essa busca me retornou algum resultado, usando rs.next()
 			 */
 			if(rs.next()) {
-				//Aqui eu estou criando uma variável temporária do tipo Department, para que
-				//eu possa armazenar o resultado do setId(). Esse método recebendo como parâmetro
-				//o rs.getInt(), me permite passar UMA STRING com o nome da coluna que quero pegar o dado
-				Department department = new Department();
-				department.setId(rs.getInt("DepartmentId"));
-				department.setName(rs.getString("DepName"));
-				Seller seller = new Seller();
-				seller.setId(rs.getInt("Id"));
-				seller.setName(rs.getString("Name"));
-				seller.setEmail(rs.getString("Email"));
-				seller.setBaseSalary(rs.getDouble("BaseSalary"));
-				seller.setBirthDate(rs.getDate("BirthDate"));
-				seller.setDepartment(department);
+				Department department = instantiateDepartment(rs);
+				Seller seller = instantiateSeller(rs, department);
 				return seller;
 			}
 			return null;			
@@ -91,6 +80,38 @@ public class SellerDaoJDBC implements SellerDao {
 	public List<Seller> findAll() {
 		
 		return null;
+	}
+	
+	/*
+	 * --Nos dois métodos a seguir, eu passo como parâmentro o ResultSet, porque ele carrega
+	 * a tabela com os dados que preciso.
+	 * ------ATENÇÃO------
+	 * ALÉM DISSO...
+	 * Esse método a princípio geraria uma EXCEÇÃO. Mas eu não quero retratá-la aqui. Eu só preciso
+	 * lançá-la, pois o método que a chamou já a trata
+	 */
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		/*
+		 * Aqui eu estou criando uma variável temporária do tipo Department, para que
+		 * eu possa armazenar o resultado do setId(). Esse método recebendo como parâmetro
+		 *o rs.getInt(), me permite passar UMA STRING com o nome da coluna que quero pegar o dado
+		 */
+		Department department = new Department();
+		department.setId(rs.getInt("DepartmentId"));
+		department.setName(rs.getString("DepName"));
+		return department;
+	}
+	
+	//Esse método pode ser PRIVATE, porque ele será chamado APENAS por meio de um método público
+	private Seller instantiateSeller(ResultSet rs, Department department) throws SQLException {
+		Seller seller = new Seller();
+		seller.setId(rs.getInt("Id"));
+		seller.setName(rs.getString("Name"));
+		seller.setEmail(rs.getString("Email"));
+		seller.setBaseSalary(rs.getDouble("BaseSalary"));
+		seller.setBirthDate(rs.getDate("BirthDate"));
+		seller.setDepartment(department);
+		return seller;
 	}
 
 	
