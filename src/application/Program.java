@@ -41,6 +41,17 @@ public class Program {
 		
 		Seller vendedor = new Seller(null, "Ana Britto","ana.tritono@gmail.com",new Date(), 3500.90,new Department(1,null));
 		sellerDao.insert(vendedor);
+		System.out.println(vendedor.getId());
+		
+		
+		System.out.println("-----------------------------TESTE UPDATE-----------------------------------");
+		//Aqui eu estou fazendo o seguinte, estou setando no JAVA primeiramente os novos dados desta instância.
+		//Uma vez feito isso, eu posso atualizar o banco com base no novo OBJETO, e não atualizar o banco diretamente com o novo valor
+		seller = sellerDao.findById(2);
+		seller.setName("Godofredo de la esperanza");
+		sellerDao.update(seller);
+		System.out.println(seller);
+		
 	}
 
 }
